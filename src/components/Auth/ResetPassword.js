@@ -30,39 +30,41 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="card">
-      <h2 className="w-full text-center">Forgot Password</h2>
-      <Formik
-        initialValues={{
-          email: "",
-        }}
-        validationSchema={ResetPasswordSchema}
-        onSubmit={resetPassword}
-      >
-        {({ errors, touched }) => (
-          <Form className="column w-full">
-            <label htmlFor="email">이메일</label>
-            <Field
-              className={cn("input", errors.email && "bg-red-50")}
-              id="email"
-              name="email"
-              placeholder="example@sim.com"
-              type="email"
-            />
-            {errors.email && touched.email ? (
-              <div className="text-red-600">{errors.email}</div>
-            ) : null}
-            <button className="button w-full" type="submit">
-              비밀번호 재설정 링크 보내기
-            </button>
-          </Form>
-        )}
-      </Formik>
-      {errorMsg && <div className="text-center text-red-600">{errorMsg}</div>}
-      {successMsg && <div className="text-center text-black">{successMsg}</div>}
-      <button className="link" type="button" onClick={() => setView(VIEWS.SIGN_IN)}>
-        비밀번호가 기억나시나요? 로그인 하러가기
-      </button>
+    <div className="min-h-screen">
+      <div className="card">
+        <h2 className="w-full text-center">Forgot Password</h2>
+        <Formik
+          initialValues={{
+            email: "",
+          }}
+          validationSchema={ResetPasswordSchema}
+          onSubmit={resetPassword}
+        >
+          {({ errors, touched }) => (
+            <Form className="column w-full">
+              <label htmlFor="email">이메일</label>
+              <Field
+                className={cn("input", errors.email && "bg-red-50")}
+                id="email"
+                name="email"
+                placeholder="example@sim.com"
+                type="email"
+              />
+              {errors.email && touched.email ? (
+                <div className="text-red-600">{errors.email}</div>
+              ) : null}
+              <button className="button w-full" type="submit">
+                비밀번호 재설정 링크 보내기
+              </button>
+            </Form>
+          )}
+        </Formik>
+        {errorMsg && <div className="text-center text-red-600">{errorMsg}</div>}
+        {successMsg && <div className="text-center text-black">{successMsg}</div>}
+        <button className="link" type="button" onClick={() => setView(VIEWS.SIGN_IN)}>
+          비밀번호가 기억나시나요? 로그인 하러가기
+        </button>
+      </div>
     </div>
   );
 };

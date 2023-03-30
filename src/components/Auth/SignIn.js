@@ -30,7 +30,7 @@ const SignIn = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       <UserHead />
       <div className="card">
         <h1 className="w-full text-center">서비스를 사용하시려면 로그인하세요.</h1>
