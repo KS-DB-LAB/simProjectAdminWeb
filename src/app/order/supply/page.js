@@ -13,11 +13,11 @@ import cn from "classnames";
 import { FaSort } from "react-icons/fa";
 
 const options = [
-  { value: "name", label: "물품명" },
-  { value: "code", label: "물품코드" },
-  { value: "supplier", label: "공급업체" },
-  { value: "category", label: "카테고리" },
-  { value: "category", label: "카테고리" },
+  { value: "supply_item_name", label: "물품명" },
+  { value: "price", label: "가격" },
+  { value: "supply_item_class", label: "종류" },
+  { value: "supply_item_specify_class", label: "상세종류" },
+  { value: "brands", label: "브랜드" },
 ];
 
 const SupplySchema = Yup.object().shape({
@@ -101,12 +101,12 @@ const Supply = () => {
   };
 
   if (initial) {
-    return <h3>Loading...</h3>;
+    return <h3 className="min-h-screen">Loading...</h3>;
   }
 
   if (user) {
     return (
-      <div className="max-h-screen w-full">
+      <div className="w-full">
         {errorMsg && (
           <Alert color="failure" icon={HiInformationCircle} onClose={() => setErrorMsg(null)}>
             <span>
@@ -118,7 +118,7 @@ const Supply = () => {
           발주 품목
         </p>
         <SearchBar options={options} />
-        <div className="relative max-h-screen w-full overflow-scroll overflow-x-auto shadow-md sm:rounded-lg">
+        <div className="relative max-h-full w-full overflow-scroll shadow-md sm:rounded-lg md:max-h-screen">
           <Table>
             <Table.Head>
               <Table.HeadCell>
@@ -196,7 +196,7 @@ const Supply = () => {
           </Table>
         </div>
         <div className="my-4 flex justify-end">
-          <Button color="gray" onClick={() => setModalOpen(true)}>
+          <Button onClick={() => setModalOpen(true)}>
             <HiPlus className="mr-3 h-4 w-4" />
             추가
           </Button>
@@ -215,7 +215,7 @@ const Supply = () => {
                   <Form className="flex w-full flex-col justify-center gap-2">
                     {Object.keys(values).map((value, index) => {
                       return (
-                        <label htmlFor={value} key={index}>
+                        <label htmlFor={value} key={index} className="dark:text-white">
                           {value}
                           <Field
                             className={cn(

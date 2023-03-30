@@ -34,7 +34,7 @@ const Specific = ({ params }) => {
 
   if (user && order?.member_order_list) {
     return (
-      <div className="w-full">
+      <div className="min-h-screen w-full">
         <h1 className="text-center text-lg font-bold">
           주문 지점 : {order.member_location_address}
         </h1>

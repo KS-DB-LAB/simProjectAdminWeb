@@ -26,13 +26,13 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <main className="grid w-full grid-flow-col">
+        <main className="grid w-full grid-flow-col dark:bg-gray-600">
           <aside
             id="default-sidebar"
             className="fix left-0 w-64 -translate-x-full transition-transform sm:translate-x-0"
             aria-label="Sidebar"
           >
-            <div className="h-screen overflow-y-auto bg-gray-50 px-3 dark:bg-gray-800">
+            <div className="h-full overflow-y-auto bg-gray-50 px-3 dark:bg-gray-800">
               <Link href="/" className="mb-5 flex items-center">
                 <Image src="/logo.jpg" width={300} height={300} alt="Flowbite Logo" />
               </Link>
@@ -64,7 +64,7 @@ export default async function RootLayout({ children }) {
             </div>
           </aside>
           <div className="flex items-center ">
-            <div className="px-4 py-2">
+            <div className="px-4 py-4">
               <AuthProvider accessToken={accessToken}>{children}</AuthProvider>
             </div>
           </div>

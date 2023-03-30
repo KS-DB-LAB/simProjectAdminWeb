@@ -52,20 +52,22 @@ const History = () => {
     return (
       <Listbox value={selected} onChange={setSelected}>
         <div className="relative mt-1">
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 dark:bg-gray-600 sm:text-sm">
             <span className="block truncate">{selected.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <FaSort className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </span>
           </Listbox.Button>
 
-          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-600 sm:text-sm">
             {statusL.map((status, statusIdx) => (
               <Listbox.Option
                 key={statusIdx}
                 className={({ active }) =>
                   `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                    active ? "bg-amber-100 text-amber-900" : "text-gray-900"
+                    active
+                      ? "bg-amber-100 text-amber-900 dark:bg-purple-800  dark:text-purple-300"
+                      : "text-gray-900 dark:text-gray-400"
                   }`
                 }
                 value={status}
@@ -76,7 +78,7 @@ const History = () => {
                       {status.name}
                     </span>
                     {selected ? (
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600 dark:text-purple-600">
                         <FaCheck className="h-5 w-5" aria-hidden="true" />
                       </span>
                     ) : null}
@@ -96,12 +98,12 @@ const History = () => {
 
   if (user) {
     return (
-      <div className="max-h-screen w-full">
+      <div className="min-h-screen w-full">
         <p className="py-1 px-1 text-center text-xl font-bold text-gray-900 dark:text-white">
           발주 내역
         </p>
         <SearchBar options={options} />
-        <div className="relative mb-6 h-screen min-h-[50vh] w-full overflow-x-auto sm:rounded-lg">
+        <div className="relative mb-6 min-h-[50vh] w-full overflow-x-auto sm:rounded-lg">
           <Table>
             <Table.Head>
               <Table.HeadCell>
@@ -142,9 +144,6 @@ const History = () => {
                   발주 상태
                   <FaSort />
                 </div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <span className="sr-only">update</span>
               </Table.HeadCell>
             </Table.Head>
             <Table.Body className="text-center">

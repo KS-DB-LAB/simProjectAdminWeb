@@ -16,7 +16,7 @@ export default async function Profile() {
   }
 
   return (
-    <div className="items-center justify-center justify-items-center">
+    <div className="min-h-screen items-center justify-center justify-items-center">
       <div className="card">
         <h2>회원정보</h2>
         <code className="highlight">{user.email}</code>
