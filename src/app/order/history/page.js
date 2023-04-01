@@ -11,11 +11,11 @@ import Link from "next/link";
 import { Listbox } from "@headlessui/react";
 
 const options = [
-  { value: "name", label: "날짜" },
-  { value: "code", label: "위치" },
-  { value: "supplier", label: "발주 품목" },
-  { value: "category", label: "가격" },
-  { value: "category", label: "발주 상태" },
+  { value: "created_at", label: "날짜" },
+  { value: "member_location_address", label: "위치" },
+  { value: "member_order_list", label: "발주 목록" },
+  { value: "member_order_total_price", label: "가격" },
+  { value: "order_status", label: "발주 상태" },
 ];
 const statusL = [{ name: "발주 준비 중" }, { name: "발주 진행 중" }, { name: "발주 완료" }];
 
@@ -23,18 +23,40 @@ const History = () => {
   const { initial, user, view, supabase } = useAuth();
   const [historyitems, setHistoryitems] = useState([]);
   const [orderBy, setOrderBy] = useState({ ord: "created_at", asc: true });
+  const [word, setWord] = useState("");
+  const [selected, setSelected] = useState(options[0].value);
 
   useEffect(() => {
     readhistoryitems();
   }, [orderBy]);
 
   const readhistoryitems = async () => {
-    const { data, error } = await supabase
-      .from("order_history_table")
-      .select("*")
-      .order(orderBy.ord, { ascending: orderBy.asc });
-    if (error) console.log("error", error);
-    else setHistoryitems(data);
+    if ((word === "") | (word === null) || word === undefined) {
+      const { data, error } = await supabase
+        .from("order_history_table")
+        .select("*")
+        .order(orderBy.ord, { ascending: orderBy.asc });
+      if (error) console.log("error", error);
+      else setHistoryitems(data);
+    } else {
+      if (selected === "member_order_total_price") {
+        const { data, error } = await supabase
+          .from("order_history_table")
+          .select("*")
+          .eq(selected, parseInt(word, 10))
+          .order(orderBy.ord, { ascending: orderBy.asc });
+        if (error) console.log("error", error);
+        else setHistoryitems(data);
+      } else {
+        const { data, error } = await supabase
+          .from("order_history_table")
+          .select("*")
+          .ilike(selected, `%${word}%`)
+          .order(orderBy.ord, { ascending: orderBy.asc });
+        if (error) console.log("error", error);
+        else setHistoryitems(data);
+      }
+    }
   };
 
   const handleStatus = async (id, status) => {
@@ -107,7 +129,14 @@ const History = () => {
         <p className="py-1 px-1 text-center text-xl font-bold text-gray-900 dark:text-white">
           발주 내역
         </p>
-        <SearchBar options={options} />
+        <SearchBar
+          options={options}
+          onSearch={readhistoryitems}
+          word={word}
+          setWord={setWord}
+          selected={selected}
+          setSelected={setSelected}
+        />
         <div className="relative mb-6 min-h-[50vh] w-full overflow-x-auto sm:rounded-lg">
           <Table>
             <Table.Head>

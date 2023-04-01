@@ -2,26 +2,29 @@
 
 import { Select, TextInput, Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { useState } from "react";
 
 const SearchBar = params => {
-  const [selected, setSelected] = useState(params.options[0].value);
-  const [word, setWord] = useState("");
-
-  const handleSearch = () => {};
-
   return (
     <div className="felx float-right mr-8 mb-4">
       <div className="flex">
-        <Select sizing="sm" onChange={e => setSelected(e.target.value)} value={selected}>
+        <Select
+          sizing="sm"
+          onChange={e => params.setSelected(e.target.value)}
+          value={params.selected}
+        >
           {params.options.map((option, index) => (
             <option key={index} value={option.value}>
               {option.label}
             </option>
           ))}
         </Select>
-        <TextInput type="text" sizing="sm" onChange={e => setWord(e.target.value)} value={word} />
-        <Button size="sm" onClick={handleSearch}>
+        <TextInput
+          type="text"
+          sizing="sm"
+          onChange={e => params.setWord(e.target.value)}
+          value={params.word}
+        />
+        <Button size="sm" onClick={params.onSearch}>
           <HiSearch className="h-4 w-6" />
         </Button>
       </div>
