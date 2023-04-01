@@ -36,6 +36,8 @@ const Supply = () => {
   const [dModalOpen, setDModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [orderBy, setOrderBy] = useState({ ord: "supply_item_name", asc: true });
+  const [word, setWord] = useState("");
+  const [selected, setSelected] = useState(options[0].value);
   const [targetObj, setTargetObj] = useState({
     id: "",
     supply_item_name: "",
@@ -50,12 +52,23 @@ const Supply = () => {
   }, [orderBy]);
 
   const readSupplyItems = async () => {
-    const { data, error } = await supabase
-      .from("supply_item_table")
-      .select("*")
-      .order(orderBy.ord, { ascending: orderBy.asc });
-    if (error) console.log("error", error);
-    else setSupplyItems(data);
+    if ((word === "") | (word === null) || word === undefined) {
+      const { data, error } = await supabase
+        .from("supply_item_table")
+        .select("*")
+        .order(orderBy.ord, { ascending: orderBy.asc });
+      if (error) console.log("error", error);
+      else setSupplyItems(data);
+      return;
+    } else {
+      const { data, error } = await supabase
+        .from("supply_item_table")
+        .select("*")
+        .ilike(selected, `%${word}%`)
+        .order(orderBy.ord, { ascending: orderBy.asc });
+      if (error) console.log("error", error);
+      else setSupplyItems(data);
+    }
   };
 
   const createSupplyItem = async formData => {
@@ -121,7 +134,14 @@ const Supply = () => {
         <p className="py-1 px-1 text-center text-xl font-bold text-gray-900 dark:text-white">
           발주 품목
         </p>
-        <SearchBar options={options} />
+        <SearchBar
+          options={options}
+          onSearch={readSupplyItems}
+          word={word}
+          setWord={setWord}
+          selected={selected}
+          setSelected={setSelected}
+        />
         <div className="relative max-h-full w-full overflow-scroll shadow-md sm:rounded-lg md:max-h-screen">
           <Table>
             <Table.Head>
