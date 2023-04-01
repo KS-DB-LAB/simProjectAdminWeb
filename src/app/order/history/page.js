@@ -22,7 +22,7 @@ const statusL = [{ name: "발주 준비 중" }, { name: "발주 진행 중" }, {
 const History = () => {
   const { initial, user, view, supabase } = useAuth();
   const [historyitems, setHistoryitems] = useState([]);
-  const [orderBy, setOrderBy] = useState({ ord: "created_at", asc: false });
+  const [orderBy, setOrderBy] = useState({ ord: "created_at", asc: true });
   const [word, setWord] = useState("");
   const [selected, setSelected] = useState(options[0].value);
 
