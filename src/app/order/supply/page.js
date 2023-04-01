@@ -35,6 +35,7 @@ const Supply = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [dModalOpen, setDModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [orderBy, setOrderBy] = useState({ ord: "supply_item_name", asc: true });
   const [targetObj, setTargetObj] = useState({
     id: "",
     supply_item_name: "",
@@ -46,10 +47,13 @@ const Supply = () => {
 
   useEffect(() => {
     readSupplyItems();
-  }, []);
+  }, [orderBy]);
 
   const readSupplyItems = async () => {
-    const { data, error } = await supabase.from("supply_item_table").select("*");
+    const { data, error } = await supabase
+      .from("supply_item_table")
+      .select("*")
+      .order(orderBy.ord, { ascending: orderBy.asc });
     if (error) console.log("error", error);
     else setSupplyItems(data);
   };
@@ -124,7 +128,7 @@ const Supply = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "supply_item_name", asc: !orderBy.asc })}
                 >
                   물품명
                   <FaSort />
@@ -133,7 +137,7 @@ const Supply = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "supply_item_price", asc: !orderBy.asc })}
                 >
                   가격
                   <FaSort />
@@ -142,7 +146,7 @@ const Supply = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "supply_item_class", asc: !orderBy.asc })}
                 >
                   종류
                   <FaSort />
@@ -151,7 +155,9 @@ const Supply = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() =>
+                    setOrderBy({ ord: "supply_item_specify_class", asc: !orderBy.asc })
+                  }
                 >
                   상세 종류
                   <FaSort />
@@ -160,7 +166,7 @@ const Supply = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "brands", asc: !orderBy.asc })}
                 >
                   브랜드
                   <FaSort />

@@ -22,13 +22,17 @@ const statusL = [{ name: "발주 준비 중" }, { name: "발주 진행 중" }, {
 const History = () => {
   const { initial, user, view, supabase } = useAuth();
   const [historyitems, setHistoryitems] = useState([]);
+  const [orderBy, setOrderBy] = useState({ ord: "created_at", asc: true });
 
   useEffect(() => {
     readhistoryitems();
-  }, []);
+  }, [orderBy]);
 
   const readhistoryitems = async () => {
-    const { data, error } = await supabase.from("order_history_table").select("*");
+    const { data, error } = await supabase
+      .from("order_history_table")
+      .select("*")
+      .order(orderBy.ord, { ascending: orderBy.asc });
     if (error) console.log("error", error);
     else setHistoryitems(data);
   };
@@ -39,18 +43,19 @@ const History = () => {
       .update({ order_status: status })
       .eq("id", id);
     if (error) console.log("error", error);
-    else console.log("data", data);
+    else return;
   };
 
   const StatusBox = params => {
     const [selected, setSelected] = useState(
       statusL.find(status => status.name === params?.sts) || statusL[0],
     );
-    useEffect(() => {
-      handleStatus(params?.id, selected.name);
-    }, [selected]);
+    const handleSts = obj => {
+      setSelected(obj);
+      handleStatus(params?.id, obj.name);
+    };
     return (
-      <Listbox value={selected} onChange={setSelected}>
+      <Listbox value={selected} onChange={obj => handleSts(obj)}>
         <div className="relative mt-1">
           <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 dark:bg-gray-600 sm:text-sm">
             <span className="block truncate">{selected.name}</span>
@@ -109,7 +114,7 @@ const History = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "created_at", asc: !orderBy.asc })}
                 >
                   날짜
                   <FaSort />
@@ -118,7 +123,7 @@ const History = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "member_location_address", asc: !orderBy.asc })}
                 >
                   위치
                   <FaSort />
@@ -130,7 +135,7 @@ const History = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "member_order_total_price", asc: !orderBy.asc })}
                 >
                   가격
                   <FaSort />
@@ -139,7 +144,7 @@ const History = () => {
               <Table.HeadCell>
                 <div
                   className="flex items-center justify-center"
-                  onClick={() => console.log("sort by name")}
+                  onClick={() => setOrderBy({ ord: "order_status", asc: !orderBy.asc })}
                 >
                   발주 상태
                   <FaSort />
