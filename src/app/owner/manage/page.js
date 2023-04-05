@@ -38,6 +38,10 @@ const History = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [brands, setBrands] = useState([]);
+  const [bankAccount, setBankAccount] = useState({
+    bank: "",
+    account_number: "",
+  });
   const [targetPoint, setTargetPoint] = useState({
     id: 0,
     point: 0,
@@ -47,6 +51,10 @@ const History = () => {
     if (user) {
       readowneritems();
       setBrands(user?.user_metadata?.brands);
+      setBankAccount({
+        bank: user?.user_metadata?.bank,
+        account_number: user?.user_metadata?.account_number,
+      });
     }
   }, [user, orderBy]);
 
@@ -104,9 +112,14 @@ const History = () => {
   };
 
   const handleConfirmUser = async id => {
+    console.log(user);
     const { error } = await supabase
       .from("shop_owner_table")
-      .update({ allocated_status: 1, member_brands: brands.join(", ") })
+      .update({
+        allocated_status: 1,
+        member_brands: brands.join(", "),
+        allocated_bank_account: bankAccount,
+      })
       .eq("id", id);
     if (error) setErrorMsg(error);
     else readowneritems();
