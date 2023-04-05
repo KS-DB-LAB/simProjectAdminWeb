@@ -27,14 +27,15 @@ const History = () => {
   const [selected, setSelected] = useState(options[0].value);
 
   useEffect(() => {
-    readhistoryitems();
-  }, [orderBy]);
+    if (user) readhistoryitems();
+  }, [user, orderBy]);
 
   const readhistoryitems = async () => {
     if ((word === "") | (word === null) || word === undefined) {
       const { data, error } = await supabase
         .from("order_history_table")
         .select("*")
+        .eq("allocated_admin", user.email)
         .order(orderBy.ord, { ascending: orderBy.asc });
       if (error) console.log("error", error);
       else setHistoryitems(data);
@@ -44,6 +45,7 @@ const History = () => {
           .from("order_history_table")
           .select("*")
           .eq(selected, parseInt(word, 10))
+          .eq("allocated_admin", user.email)
           .order(orderBy.ord, { ascending: orderBy.asc });
         if (error) console.log("error", error);
         else setHistoryitems(data);
@@ -51,6 +53,7 @@ const History = () => {
         const { data, error } = await supabase
           .from("order_history_table")
           .select("*")
+          .eq("allocated_admin", user.email)
           .ilike(selected, `%${word}%`)
           .order(orderBy.ord, { ascending: orderBy.asc });
         if (error) console.log("error", error);
@@ -60,7 +63,7 @@ const History = () => {
   };
 
   const handleStatus = async (id, status) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("order_history_table")
       .update({ order_status: status })
       .eq("id", id);

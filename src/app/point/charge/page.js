@@ -25,8 +25,8 @@ const ChargeManage = () => {
   const [chargeitems, setChargeitems] = useState([]);
 
   useEffect(() => {
-    readchargeitems();
-  }, [orderBy]);
+    if (user) readchargeitems();
+  }, [user, orderBy]);
 
   const readchargeitems = async () => {
     if ((word === "") | (word === null) || word === undefined) {
@@ -38,6 +38,7 @@ const ChargeManage = () => {
             member_name
         )`,
         )
+        .eq("allocated_admin", user.email)
         .order(orderBy.ord, { ascending: orderBy.asc });
       if (error) setErrorMsg(error);
       else setChargeitems(data);
@@ -51,6 +52,7 @@ const ChargeManage = () => {
               member_name
           )`,
           )
+          .eq("allocated_admin", user.email)
           .eq(selected, parseInt(word, 10))
           .order(orderBy.ord, { ascending: orderBy.asc });
         if (error) setErrorMsg(error);
@@ -64,6 +66,7 @@ const ChargeManage = () => {
               member_name
           )`,
           )
+          .eq("allocated_admin", user.email)
           .ilike(selected, `%${word}%`)
           .order(orderBy.ord, { ascending: orderBy.asc });
         if (error) setErrorMsg(error);
@@ -92,7 +95,7 @@ const ChargeManage = () => {
     }
   };
   const updatePoint = async (id, point) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("shop_owner_table")
       .update({ charged_money: point })
       .eq("member_id", id);

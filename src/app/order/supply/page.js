@@ -48,14 +48,17 @@ const Supply = () => {
   });
 
   useEffect(() => {
-    readSupplyItems();
-  }, [orderBy]);
+    if (user) readSupplyItems();
+  }, [user, orderBy]);
+
+  console.log(user);
 
   const readSupplyItems = async () => {
     if ((word === "") | (word === null) || word === undefined) {
       const { data, error } = await supabase
         .from("supply_item_table")
         .select("*")
+        .in("brands", user?.user_metadata?.brands)
         .order(orderBy.ord, { ascending: orderBy.asc });
       if (error) console.log("error", error);
       else setSupplyItems(data);
@@ -64,6 +67,7 @@ const Supply = () => {
       const { data, error } = await supabase
         .from("supply_item_table")
         .select("*")
+        .in("brands", user?.user_metadata?.brands)
         .ilike(selected, `%${word}%`)
         .order(orderBy.ord, { ascending: orderBy.asc });
       if (error) console.log("error", error);
