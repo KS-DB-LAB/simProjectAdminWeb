@@ -104,7 +104,6 @@ const History = () => {
   };
 
   const handleConfirmUser = async id => {
-    console.log(brands);
     const { error } = await supabase
       .from("shop_owner_table")
       .update({ allocated_status: 1, member_brands: brands.toString() })
