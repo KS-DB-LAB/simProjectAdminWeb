@@ -47,6 +47,14 @@ export default async function RootLayout({ children }) {
                     href: "/order/history",
                   },
                   {
+                    name: "충전 기록",
+                    href: "/point/charge",
+                  },
+                  {
+                    name: "지점 관리",
+                    href: "/owner/manage",
+                  },
+                  {
                     name: "프로필",
                     href: "/profile",
                   },
