@@ -6,18 +6,19 @@ import { useAuth } from "src/components/AuthProvider";
 import SearchBar from "@/components/SearchBar";
 import { useState, useEffect } from "react";
 import { FaSort } from "react-icons/fa";
+import { HiInformationCircle } from "react-icons/hi";
 import { Button, Table, Modal, Alert } from "flowbite-react";
 import { Fragment } from "react";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import cn from "classnames";
-import { HiInformationCircle } from "react-icons/hi";
 
 const options = [
   { value: "member_name", label: "이름" },
   { value: "member_id", label: "아이디" },
   { value: "location_address", label: "위치" },
   { value: "charged_money", label: "잔여 포인트" },
+  { value: "allocated_status", label: "승인 상태" },
 ];
 
 const PointSchema = Yup.object().shape({
@@ -29,6 +30,7 @@ const PointSchema = Yup.object().shape({
 
 const History = () => {
   const { initial, user, view, supabase } = useAuth();
+
   const [owneritems, setOwneritems] = useState([]);
   const [orderBy, setOrderBy] = useState({ ord: "member_name", asc: false });
   const [word, setWord] = useState("");
@@ -41,14 +43,16 @@ const History = () => {
   });
 
   useEffect(() => {
-    readowneritems();
-  }, [orderBy]);
+    if (user) readowneritems();
+  }, [user, orderBy]);
 
   const readowneritems = async () => {
     if ((word === "") | (word === null) || word === undefined) {
       const { data, error } = await supabase
         .from("shop_owner_table")
         .select("*")
+        .eq("allocated_admin", user.email)
+        .order("allocated_status")
         .order(orderBy.ord, { ascending: orderBy.asc });
       if (error) setErrorMsg(error);
       else setOwneritems(data);
@@ -93,6 +97,15 @@ const History = () => {
       readowneritems();
     }
     handleClose();
+  };
+
+  const handleConfirmUser = async id => {
+    const { error } = await supabase
+      .from("shop_owner_table")
+      .update({ allocated_status: 1 })
+      .eq("id", id);
+    if (error) setErrorMsg(error);
+    else readowneritems();
   };
 
   if (initial) {
@@ -159,6 +172,15 @@ const History = () => {
                   <FaSort />
                 </div>
               </Table.HeadCell>
+              <Table.HeadCell>
+                <div
+                  className="flex items-center justify-center"
+                  onClick={() => setOrderBy({ ord: "allocated_status", asc: !orderBy.asc })}
+                >
+                  승인 여부
+                  <FaSort />
+                </div>
+              </Table.HeadCell>
             </Table.Head>
             <Table.Body className="text-center">
               {owneritems.map(item => (
@@ -169,6 +191,11 @@ const History = () => {
                   <Table.Cell>
                     <div onClick={() => handleEditPoint(item.id, item.charged_money)}>
                       {item.charged_money}
+                    </div>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div onClick={() => handleConfirmUser(item.id)}>
+                      {item.allocated_status === 1 ? "승인됨" : "미승인"}
                     </div>
                   </Table.Cell>
                 </Table.Row>
