@@ -4,9 +4,14 @@
 import Auth from "src/components/Auth";
 import { useAuth } from "src/components/AuthProvider";
 import SearchBar from "@/components/SearchBar";
-import { Table } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { FaSort } from "react-icons/fa";
+import { Button, Table, Modal, Alert } from "flowbite-react";
+import { Fragment } from "react";
+import { Field, Form, Formik } from "formik";
+import * as Yup from "yup";
+import cn from "classnames";
+import { HiInformationCircle } from "react-icons/hi";
 
 const options = [
   { value: "member_name", label: "이름" },
@@ -15,12 +20,25 @@ const options = [
   { value: "charged_money", label: "잔여 포인트" },
 ];
 
+const PointSchema = Yup.object().shape({
+  point: Yup.number()
+    .required("포인트를 입력해주세요")
+    .positive("포인트는 양수만 입력해주세요")
+    .integer("포인트는 정수만 입력해주세요"),
+});
+
 const History = () => {
   const { initial, user, view, supabase } = useAuth();
   const [owneritems, setOwneritems] = useState([]);
   const [orderBy, setOrderBy] = useState({ ord: "member_name", asc: false });
   const [word, setWord] = useState("");
   const [selected, setSelected] = useState(options[0].value);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [targetPoint, setTargetPoint] = useState({
+    id: 0,
+    point: 0,
+  });
 
   useEffect(() => {
     readowneritems();
@@ -32,7 +50,7 @@ const History = () => {
         .from("shop_owner_table")
         .select("*")
         .order(orderBy.ord, { ascending: orderBy.asc });
-      if (error) console.log("error", error);
+      if (error) setErrorMsg(error);
       else setOwneritems(data);
     } else {
       if (selected === "member_order_total_price") {
@@ -41,19 +59,40 @@ const History = () => {
           .select("*")
           .eq(selected, parseInt(word, 10))
           .order(orderBy.ord, { ascending: orderBy.asc });
-        if (error) console.log("error", error);
+        if (error) setErrorMsg(error);
         else setOwneritems(data);
       } else {
         const { data, error } = await supabase
-
           .from("shop_owner_table")
           .select("*")
           .ilike(selected, `%${word}%`)
           .order(orderBy.ord, { ascending: orderBy.asc });
-        if (error) console.log("error", error);
+        if (error) setErrorMsg(error);
         else setOwneritems(data);
       }
     }
+  };
+
+  const handleEditPoint = (id, point) => {
+    setTargetPoint({ id, point });
+    setModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setTargetPoint({ id: 0, point: 0 });
+    setModalOpen(false);
+  };
+
+  const handleSubmit = async formData => {
+    const { error } = await supabase
+      .from("shop_owner_table")
+      .update({ charged_money: formData.point })
+      .eq("id", targetPoint.id);
+    if (error) setErrorMsg(error);
+    else {
+      readowneritems();
+    }
+    handleClose();
   };
 
   if (initial) {
@@ -63,6 +102,13 @@ const History = () => {
   if (user) {
     return (
       <div className="min-h-screen w-full">
+        {errorMsg && (
+          <Alert color="failure" icon={HiInformationCircle} onClose={() => setErrorMsg(null)}>
+            <span>
+              <span className="font-medium">Error!</span> {errorMsg}
+            </span>
+          </Alert>
+        )}
         <p className="py-1 px-1 text-center text-xl font-bold text-gray-900 dark:text-white">
           지점 관리
         </p>
@@ -120,12 +166,72 @@ const History = () => {
                   <Table.Cell>{item.member_name}</Table.Cell>
                   <Table.Cell>{item.member_id}</Table.Cell>
                   <Table.Cell>{item.location_address}</Table.Cell>
-                  <Table.Cell>{item.charged_money}</Table.Cell>
+                  <Table.Cell>
+                    <div onClick={() => handleEditPoint(item.id, item.charged_money)}>
+                      {item.charged_money}
+                    </div>
+                  </Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>
           </Table>
         </div>
+        <Fragment>
+          <Modal show={modalOpen} size="sm" onClose={handleClose}>
+            <Modal.Header className="text-xs">포인트 수정</Modal.Header>
+            <Modal.Body>
+              <Formik
+                enableReinitialize
+                initialValues={{
+                  point: targetPoint.point,
+                }}
+                validationSchema={PointSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ isSubmitting, values, errors, touched }) => (
+                  <Form>
+                    <div className="space-y-6">
+                      <div className="space-y-1">
+                        {Object.keys(values).map((value, index) => {
+                          return (
+                            <label htmlFor={value} className="text-xs" key={index}>
+                              포인트
+                              <Field
+                                id={value}
+                                name={value}
+                                type="number"
+                                className={cn(
+                                  "block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
+                                  errors[value] && touched[value] && "bg-red-50",
+                                )}
+                              />
+                              {errors[value] && touched[value] ? (
+                                <div className="text-sm text-red-600">{errors[value]}</div>
+                              ) : null}
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-end">
+                        <Button color="gray" className="w-20" onClick={handleClose}>
+                          취소
+                        </Button>
+                        <Button
+                          color="warning"
+                          className="w-20"
+                          type="submit"
+                          disabled={isSubmitting}
+                        >
+                          확인
+                        </Button>
+                      </div>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </Modal.Body>
+          </Modal>
+        </Fragment>
       </div>
     );
   }
