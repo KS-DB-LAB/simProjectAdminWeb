@@ -37,13 +37,17 @@ const History = () => {
   const [selected, setSelected] = useState(options[0].value);
   const [modalOpen, setModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [brands, setBrands] = useState([]);
   const [targetPoint, setTargetPoint] = useState({
     id: 0,
     point: 0,
   });
 
   useEffect(() => {
-    if (user) readowneritems();
+    if (user) {
+      readowneritems();
+      setBrands(user?.user_metadata?.brands);
+    }
   }, [user, orderBy]);
 
   const readowneritems = async () => {
@@ -102,7 +106,7 @@ const History = () => {
   const handleConfirmUser = async id => {
     const { error } = await supabase
       .from("shop_owner_table")
-      .update({ allocated_status: 1, member_brand: user?.user_metadata?.brands })
+      .update({ allocated_status: 1, member_brands: brands.toString() })
       .eq("id", id);
     if (error) setErrorMsg(error);
     else readowneritems();
