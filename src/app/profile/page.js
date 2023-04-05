@@ -22,6 +22,12 @@ export default async function Profile() {
         <code className="highlight">{user.email}</code>
         <div className="heading">Last Signed In:</div>
         <code className="highlight">{new Date(user.last_sign_in_at).toUTCString()}</code>
+        <div className="heading">Brands:</div>
+        <div className="highlight">
+          {user?.user_metadata?.brands.map((brand, idx) => (
+            <div key={idx}>{brand}</div>
+          ))}
+        </div>
         <Link className="button" href="/">
           Go Home
         </Link>

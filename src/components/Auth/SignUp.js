@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import cn from "classnames";
-import { Field, Form, Formik } from "formik";
+import { Field, Form, Formik, FieldArray, getIn } from "formik";
 import * as Yup from "yup";
-
+import { FaPlusCircle, FaMinusCircle } from "react-icons/fa";
 import { useAuth, VIEWS } from "src/components/AuthProvider";
 import supabase from "src/lib/supabase-browser";
 
 const SignUpSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
   password: Yup.string().required("Required"),
+  brands: Yup.array().of(Yup.string().required("Required")),
 });
 
 const SignUp = () => {
@@ -18,10 +19,15 @@ const SignUp = () => {
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  async function signUp(formData) {
+  const signUp = async formData => {
     const { error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
+      options: {
+        data: {
+          brands: formData.brands,
+        },
+      },
     });
 
     if (error) {
@@ -29,7 +35,7 @@ const SignUp = () => {
     } else {
       setSuccessMsg("Success! Please check your email for further instructions.");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen">
@@ -39,11 +45,12 @@ const SignUp = () => {
           initialValues={{
             email: "",
             password: "",
+            brands: [],
           }}
           validationSchema={SignUpSchema}
           onSubmit={signUp}
         >
-          {({ errors, touched }) => (
+          {({ values, errors, touched }) => (
             <Form className="column w-full">
               <label htmlFor="email">이메일</label>
               <Field
@@ -67,6 +74,41 @@ const SignUp = () => {
               {errors.password && touched.password ? (
                 <div className="text-red-600">{errors.password}</div>
               ) : null}
+
+              <FieldArray name="brands">
+                {arrayHelpers => (
+                  <div className="flex flex-col gap-1">
+                    {values.brands && values.brands.length > 0 ? (
+                      values.brands.map((_, index) => (
+                        <div key={index}>
+                          <div className="flex flex-row items-center justify-center">
+                            <Field className={"input mr-1 p-1"} name={`brands.${index}`} />
+                            <FaMinusCircle
+                              type="button"
+                              onClick={() => arrayHelpers.remove(index)}
+                            />
+                            <FaPlusCircle
+                              type="button"
+                              onClick={() => arrayHelpers.insert(index, "")}
+                            />
+                          </div>
+                          {getIn(errors, `brands.${index}`) && getIn(touched, `brands.${index}`) ? (
+                            <div className="text-red-600">{errors.brands.at(index)}</div>
+                          ) : null}
+                        </div>
+                      ))
+                    ) : (
+                      <button
+                        className="button"
+                        type="button"
+                        onClick={() => arrayHelpers.push("")}
+                      >
+                        브랜드 추가하기
+                      </button>
+                    )}
+                  </div>
+                )}
+              </FieldArray>
 
               <button className="button w-full" type="submit">
                 가입
