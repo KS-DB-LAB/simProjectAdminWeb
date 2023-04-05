@@ -106,7 +106,7 @@ const History = () => {
   const handleConfirmUser = async id => {
     const { error } = await supabase
       .from("shop_owner_table")
-      .update({ allocated_status: 1, member_brands: brands.toString() })
+      .update({ allocated_status: 1, member_brands: brands.join(", ") })
       .eq("id", id);
     if (error) setErrorMsg(error);
     else readowneritems();
