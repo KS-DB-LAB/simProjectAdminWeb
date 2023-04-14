@@ -15,7 +15,7 @@ const UpdateUserDataSchema = Yup.object().shape({
 });
 
 const UpdateUserData = () => {
-  const { initial, user, view, supabase } = useAuth();
+  const { initial, user, view, supabase, signOut } = useAuth();
 
   const [errorMsg, setErrorMsg] = useState(null);
   const [userData, setUserData] = useState({});
@@ -41,8 +41,8 @@ const UpdateUserData = () => {
     });
     if (error) setErrorMsg(error.message);
     else {
-      alert("Success! Your user data has been updated.");
-      location.href = "/";
+      alert("변경 되었습니다. 다시 로그인 해주세요.");
+      await signOut();
     }
   };
 
