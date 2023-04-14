@@ -11,6 +11,8 @@ import supabase from "src/lib/supabase-browser";
 const SignUpSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
   password: Yup.string().required("Required"),
+  bank: Yup.string().required("Required"),
+  account_number: Yup.string().required("Required"),
   brands: Yup.array().of(Yup.string().required("Required")),
 });
 
@@ -25,6 +27,8 @@ const SignUp = () => {
       password: formData.password,
       options: {
         data: {
+          bank: formData.bank,
+          account_number: formData.account_number,
           brands: formData.brands,
         },
       },
@@ -45,6 +49,8 @@ const SignUp = () => {
           initialValues={{
             email: "",
             password: "",
+            bank: "",
+            account_number: "",
             brands: [],
           }}
           validationSchema={SignUpSchema}
@@ -70,6 +76,31 @@ const SignUp = () => {
                 id="password"
                 name="password"
                 type="password"
+              />
+              {errors.password && touched.password ? (
+                <div className="text-red-600">{errors.password}</div>
+              ) : null}
+
+              <label htmlFor="bank">은행</label>
+              <Field
+                className={cn("input", errors.bank && touched.bank && "bg-red-50")}
+                id="bank"
+                name="bank"
+                type="text"
+              />
+              {errors.password && touched.password ? (
+                <div className="text-red-600">{errors.password}</div>
+              ) : null}
+
+              <label htmlFor="email">계좌번호</label>
+              <Field
+                className={cn(
+                  "input",
+                  errors.account_number && touched.account_number && "bg-red-50",
+                )}
+                id="account_number"
+                name="account_number"
+                type="text"
               />
               {errors.password && touched.password ? (
                 <div className="text-red-600">{errors.password}</div>
