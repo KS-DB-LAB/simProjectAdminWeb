@@ -51,8 +51,6 @@ const Supply = () => {
     if (user) readSupplyItems();
   }, [user, orderBy]);
 
-  console.log(user);
-
   const readSupplyItems = async () => {
     if ((word === "") | (word === null) || word === undefined) {
       const { data, error } = await supabase
@@ -60,7 +58,7 @@ const Supply = () => {
         .select("*")
         .in("brands", user?.user_metadata?.brands)
         .order(orderBy.ord, { ascending: orderBy.asc });
-      if (error) console.log("error", error);
+      if (error) setErrorMsg(error.message);
       else setSupplyItems(data);
       return;
     } else {
@@ -70,7 +68,7 @@ const Supply = () => {
         .in("brands", user?.user_metadata?.brands)
         .ilike(selected, `%${word}%`)
         .order(orderBy.ord, { ascending: orderBy.asc });
-      if (error) console.log("error", error);
+      if (error) setErrorMsg(error.message);
       else setSupplyItems(data);
     }
   };
@@ -79,7 +77,10 @@ const Supply = () => {
     delete formData.id;
     const { error } = await supabase.from("supply_item_table").insert(formData);
     if (error) setErrorMsg(error.message);
-    else readSupplyItems().then(() => handleClose());
+    else
+      readSupplyItems()
+        .then(() => handleClose())
+        .then(() => location.reload());
   };
 
   const updateSupplyItem = async formData => {
@@ -121,13 +122,47 @@ const Supply = () => {
     });
   };
 
+  const valueToKor = name => {
+    switch (name) {
+      case "supply_item_name":
+        return "물품명";
+      case "supply_item_class":
+        return "종류";
+      case "supply_item_specify_class":
+        return "상세종류";
+      case "supply_item_price":
+        return "가격";
+      case "brands":
+        return "브랜드";
+      default:
+        return "ID";
+    }
+  };
+
+  const valueToPlaceholder = name => {
+    switch (name) {
+      case "supply_item_name":
+        return "비빔양념(1kg)";
+      case "supply_item_class":
+        return "식재료";
+      case "supply_item_specify_class":
+        return "소스";
+      case "supply_item_price":
+        return "8000";
+      case "brands":
+        return "밀면제작소";
+      default:
+        return "00";
+    }
+  };
+
   if (initial) {
     return <h3 className="min-h-screen">Loading...</h3>;
   }
 
   if (user) {
     return (
-      <div className="w-full">
+      <div className="min-h-screen w-full">
         {errorMsg && (
           <Alert color="failure" icon={HiInformationCircle} onClose={() => setErrorMsg(null)}>
             <span>
@@ -231,7 +266,7 @@ const Supply = () => {
             추가
           </Button>
         </div>
-        <Fragment>
+        <>
           <Modal show={modalOpen} size="sm" onClose={handleClose}>
             <Modal.Header className="text-xs">물품 관리</Modal.Header>
             <Modal.Body>
@@ -246,7 +281,7 @@ const Supply = () => {
                     {Object.keys(values).map((value, index) => {
                       return (
                         <label htmlFor={value} key={index} className="dark:text-white">
-                          {value}
+                          {valueToKor(value)}
                           <Field
                             className={cn(
                               "block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
@@ -254,7 +289,7 @@ const Supply = () => {
                             )}
                             id={value}
                             name={value}
-                            placeholder={value}
+                            placeholder={valueToPlaceholder(value)}
                             type="text"
                             disabled={value === "id"}
                           />
@@ -264,6 +299,7 @@ const Supply = () => {
                         </label>
                       );
                     })}
+                    <br />
                     <Button.Group className="w-full">
                       <Button color="green" type="submit">
                         저장
@@ -296,7 +332,7 @@ const Supply = () => {
               </Button>
             </Modal.Footer>
           </Modal>
-        </Fragment>
+        </>
       </div>
     );
   }
