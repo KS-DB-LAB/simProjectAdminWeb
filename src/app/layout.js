@@ -8,7 +8,7 @@ import "src/styles/globals.css";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Next.js with Supabase Auth",
+  title: "Saile Admin",
   icons: {
     favicon: "/favicon.ico",
   },

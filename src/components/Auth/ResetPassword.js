@@ -4,6 +4,7 @@ import { useState } from "react";
 import cn from "classnames";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
+import { Modal, Button } from "flowbite-react";
 
 import { useAuth, VIEWS } from "src/components/AuthProvider";
 import supabase from "src/lib/supabase-browser";
@@ -16,8 +17,10 @@ const ResetPassword = () => {
   const { setView } = useAuth();
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [modal, setModal] = useState(false);
 
   async function resetPassword(formData) {
+    setModal(true);
     const { error } = await supabase.auth.resetPasswordForEmail(formData?.email, {
       redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_BASE_URL}`,
     });
@@ -25,12 +28,39 @@ const ResetPassword = () => {
     if (error) {
       setErrorMsg(error.message);
     } else {
-      setSuccessMsg("Password reset instructions sent.");
+      setSuccessMsg("비밀번호 재설정 링크를 보내드렸습니다. 이메일을 확인해주세요.");
     }
   }
 
+  const handleCloseModal = () => {
+    setModal(false);
+    setView(VIEWS.SIGN_IN);
+  };
+
   return (
     <div className="min-h-screen">
+      <>
+        <Modal show={modal} size="md" onClose={() => setModal(false)} popup={true}>
+          <Modal.Header />
+          <Modal.Body>
+            <div className="text-center">
+              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                {successMsg ? (
+                  <>
+                    <p>비밀번호 초기화 링크를 보내드렸습니다.</p>
+                    <p>이메일을 확인해주세요.</p>
+                  </>
+                ) : (
+                  "잠시 기다려 주세요."
+                )}
+              </h3>
+              <div className="flex justify-center gap-4">
+                <Button onClick={handleCloseModal}>로그인 하기</Button>
+              </div>
+            </div>
+          </Modal.Body>
+        </Modal>
+      </>
       <div className="card">
         <h2 className="w-full text-center">Forgot Password</h2>
         <Formik
