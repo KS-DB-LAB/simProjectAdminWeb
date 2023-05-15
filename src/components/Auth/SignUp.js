@@ -13,7 +13,18 @@ const SignUpSchema = Yup.object().shape({
   password: Yup.string().required("Required"),
   bank: Yup.string().required("Required"),
   account_number: Yup.string().required("Required"),
-  brands: Yup.array().of(Yup.string().required("Required")),
+  brands: Yup.array().of(
+    Yup.string()
+      .test("brand", "brand의 관리자가 이미 존재합니다.", async value => {
+        const { data, error } = await supabase
+          .from("brand_list")
+          .select("brand")
+          .like("brand", `%${value}%`);
+        if (error) return false;
+        else return data.length <= 0;
+      })
+      .required("Required"),
+  ),
 });
 
 const SignUp = () => {
@@ -37,7 +48,10 @@ const SignUp = () => {
     if (error) {
       setErrorMsg(error.message);
     } else {
-      setSuccessMsg("Success! Please check your email for further instructions.");
+      setSuccessMsg("회원가입이 완료되었습니다. 이메일을 확인해주세요.");
+      formData?.brands?.forEach(async brand => {
+        await supabase.from("brand_list").insert({ brand: brand });
+      });
     }
   };
 
