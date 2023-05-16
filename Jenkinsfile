@@ -3,18 +3,12 @@ node {
     checkout scm
   }
   stage('========== Build image ==========') {
-    agent any
-    steps {
-      sh 'docker build -t handawoon/saile-admin:latest .'
-    }
+    app = docker.build("handawoon/saile-admin")
   }
   stage('========== Push image ==========') {
-    agent any
-      steps {
-      	withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-        	sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-          sh 'docker push handawoon/saile-admin:latest'
-        }
-      }
+    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+      app.push("${env.BUILD_NUMBER}")
+      app.push("latest")
+    }
   }
 }
