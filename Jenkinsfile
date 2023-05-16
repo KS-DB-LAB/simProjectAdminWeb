@@ -15,5 +15,6 @@ node {
         	sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
           sh 'docker push handawoon/saile-admin:latest'
         }
+      }
   }
 }
