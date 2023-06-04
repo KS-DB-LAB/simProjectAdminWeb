@@ -206,14 +206,26 @@ const History = () => {
                   <Table.Cell>{item.member_id}</Table.Cell>
                   <Table.Cell>{item.location_address}</Table.Cell>
                   <Table.Cell>
-                    <div onClick={() => handleEditPoint(item.id, item.charged_money)}>
+                    <div
+                      onClick={() => {
+                        item?.allocated_status
+                          ? handleEditPoint(item.id, item.charged_money)
+                          : alert("승인이 필요합니다.");
+                      }}
+                    >
                       {item.charged_money}
                     </div>
                   </Table.Cell>
-                  <Table.Cell>
-                    <div onClick={() => handleConfirmUser(item.id)}>
+                  <Table.Cell className="flex justify-center">
+                    <Button
+                      size={"small"}
+                      onClick={() => handleConfirmUser(item.id)}
+                      disabled={item?.allocated_status === 1}
+                      className="w-20"
+                      color={item?.allocated_status === 1 ? "success" : "warning"}
+                    >
                       {item.allocated_status === 1 ? "승인됨" : "미승인"}
-                    </div>
+                    </Button>
                   </Table.Cell>
                 </Table.Row>
               ))}
