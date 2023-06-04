@@ -8,12 +8,6 @@ import { FieldArray, Field, Form, Formik, getIn } from "formik";
 import * as Yup from "yup";
 import { FaPlusCircle, FaMinusCircle } from "react-icons/fa";
 
-const UpdateUserDataSchema = Yup.object().shape({
-  bank: Yup.string().required("Required"),
-  account_number: Yup.string().required("Required"),
-  brands: Yup.array().of(Yup.string().required("Required")),
-});
-
 const UpdateUserData = () => {
   const { initial, user, view, supabase, signOut } = useAuth();
 
@@ -31,25 +25,60 @@ const UpdateUserData = () => {
     }
   }, []);
 
+  const UpdateUserDataSchema = Yup.object().shape({
+    bank: Yup.string().required("Required"),
+    account_number: Yup.string().required("Required"),
+    brands: Yup.array().of(
+      Yup.string()
+        .test("brand", "brand의 관리자가 이미 존재합니다.", async value => {
+          const { data, error } = await supabase
+            .from("brand_list")
+            .select("*")
+            .like("brand", `%${value}%`)
+            .neq("admin", user?.id);
+          if (error) return false;
+          else return data.length <= 0;
+        })
+        // .test("brand", "해당 브랜드의 관리자로 등록되어 있습니다.", async value => {
+        //   const { data, error } = await supabase
+        //     .from("brand_list")
+        //     .select("*")
+        //     .like("brand", `%${value}%`)
+        //     .eq("admin", user?.id);
+        //   if (error) return false;
+        //   else return data.length <= 0;
+        // })
+        .required("Required"),
+    ),
+  });
+
   const updateUserData = async formData => {
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        bank: formData.bank,
-        account_number: formData.account_number,
-        brands: formData.brands,
-      },
-    });
-    if (error) setErrorMsg(error.message);
-    else {
-      alert("변경 되었습니다. 다시 로그인 해주세요.");
-      await signOut();
-    }
+    await supabase.auth
+      .updateUser({
+        data: {
+          bank: formData.bank,
+          account_number: formData.account_number,
+          brands: formData.brands,
+        },
+      })
+      .then(async () => {
+        formData?.brands?.forEach(async brand => {
+          await supabase.from("brand_list").upsert({ brand: brand, admin: user?.id });
+        });
+      })
+      .then(() => {
+        alert("정보가 변경되었습니다.\n다시 로그인해주세요.");
+        signOut();
+      })
+      .catch(error => {
+        setErrorMsg(error.message);
+      });
   };
 
   if (initial) <h3>Loading...</h3>;
   if (user)
     return (
-      <div className="min-h-screen">
+      <div>
         <div className="card">
           <h2 className="w-full text-center">내정보 변경</h2>
           <Formik
